@@ -323,7 +323,7 @@ post '/bet/won/:id' do
             status 404
             result = {"error" => 'bet in wrong state'}
             body result.to_json
-          elsif bet['challengee'] == user['id'] && bet['status_challengee'] != :nil
+          elsif bet['challengee'] == user['id'] && bet['status_challengee'] != nil
             status 404
             result = {"error" => 'bet in wrong state'}
             body result.to_json
@@ -420,7 +420,7 @@ post '/bet/lost/:id' do
             status 404
             result = {"error" => 'bet in wrong state'}
             body result.to_json
-          elsif bet['challengee'] == user['id'] && bet['status_challengee'] != :nil
+          elsif bet['challengee'] == user['id'] && bet['status_challengee'] != nil
             status 404
             result = {"error" => 'bet in wrong state'}
             body result.to_json
