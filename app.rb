@@ -1,6 +1,7 @@
 require 'sinatra'
 require 'mysql'
 require 'json'
+require 'sinatra/json'
 
 enable :sessions
 set :bind, '0.0.0.0'
@@ -106,7 +107,8 @@ get '/dashboard' do
         }
       }
       status 200
-      body result.to_json
+      json :result => result
+      #body result.to_json
       mysql.close
     end
   end
@@ -145,8 +147,9 @@ get '/bet/mine' do
       end
       mysql.close
       status 200
-      result = {'result' => bets}
-      body result.to_json
+      json :result => bets
+      # = {'result' => bets}
+      #body result.to_json
     end
   end
 end
@@ -161,7 +164,7 @@ post '/bet/new' do
       mysql.close
       status 400
       result = {"error" => "required_arguments: challengee, description, points"}
-      body result.to_json
+      json :result => result
     else
       rs = mysql.query \
         "SELECT * FROM `ibetyou`.`user` WHERE `token`='#{params[:token]}'"
@@ -177,24 +180,24 @@ post '/bet/new' do
           mysql.close
           status 400
           result = {"error" => "invalid challengee"}
-          body result.to_json
+          json :result => result
         else
           challengee = rs.fetch_hash
           if challenger['points'].to_i < params[:points].to_i
             mysql.close
             status 400
             result = {"error" => "challenger without enough points"}
-            body result.to_json
+            json :result => result
           elsif challengee['points'].to_i < params[:points].to_i
             mysql.close
             status 400
             result = {"error" => "challengee without enough points"}
-            body result.to_json
+            json :result => result
           elsif challengee['email'] == challenger['email']
             mysql.close
             status 400
             result = {"error" => "cant bet against yourself dude!"}
-            body result.to_json            
+            json :result => result
           else
             mysql.query \
               "UPDATE `ibetyou`.`user` SET `points`=`points`-#{params[:points]} " \
@@ -258,7 +261,7 @@ post '/bet/accept/:id' do
         mysql.close
         status 400
         result = {'error' => 'missing bet id'}
-        body result.to_json
+        json :result => result
       else
         rs = mysql.query "SELECT * FROM `ibetyou`.`bet` WHERE `id`=#{params[:id]}"
         if rs.num_rows === 0
@@ -276,7 +279,7 @@ post '/bet/accept/:id' do
             mysql.close
             status 400
             result = {'error' => 'Bet already underway or finished'}
-            body result.to_json
+            json :result => result
           else
             mysql.query "UPDATE `ibetyou`.`bet` SET `status`='accepted' WHERE `id`=#{params[:id]}"
             mysql.query \
@@ -310,7 +313,7 @@ post '/bet/won/:id' do
         mysql.close
         status 400
         result = {'error' => 'missing bet id'}
-        body result.to_json
+        json :result => result
       else
         rs = mysql.query "SELECT * FROM `ibetyou`.`bet` WHERE `id`=#{params[:id]}"
         if rs.num_rows === 0
@@ -322,11 +325,11 @@ post '/bet/won/:id' do
           if bet['challenger'] == user['id'] && bet['status'] != 'accepted'
             status 404
             result = {"error" => 'bet in wrong state'}
-            body result.to_json
+            json :result => result
           elsif bet['challengee'] == user['id'] && bet['status_challengee'] != nil
             status 404
             result = {"error" => 'bet in wrong state'}
-            body result.to_json
+            json :result => result
           else
             if bet['challenger'] == user['id']
               mysql.query "UPDATE `ibetyou`.`bet` SET `status`='won' WHERE `id`=#{bet['id']}"
@@ -382,7 +385,7 @@ post '/bet/won/:id' do
             else
               status 403
               result = {"error" => "you're not involved in this bet"}
-              body result.to_json
+              json :result => result
             end
           end
         end
@@ -409,7 +412,7 @@ post '/bet/lost/:id' do
         mysql.close
         status 400
         result = {'error' => 'missing bet id'}
-        body result.to_json
+        json :result => result
       else
         rs = mysql.query "SELECT * FROM `ibetyou`.`bet` WHERE `id`=#{params[:id]}"
         if rs.num_rows === 0
@@ -421,11 +424,11 @@ post '/bet/lost/:id' do
           if bet['status'] != 'accepted'
             status 404
             result = {"error" => 'bet in wrong state'}
-            body result.to_json
+            json :result => result
           elsif bet['challengee'] == user['id'] && bet['status_challengee'] != nil
             status 404
             result = {"error" => 'bet in wrong state'}
-            body result.to_json
+            json :result => result
           else
             if bet['challenger'] == user['id']
               mysql.query "UPDATE `ibetyou`.`bet` SET `status`='lost' WHERE `id`=#{bet['id']}"
@@ -479,7 +482,7 @@ post '/bet/lost/:id' do
             else
               status 403
               result = {"error" => "you're not involved in this bet"}
-              body result.to_json
+              json :result => result
             end
           end
         end
@@ -506,7 +509,7 @@ post '/bet/reject/:id' do
         mysql.close
         status 400
         result = {'error' => 'missing bet id'}
-        body result.to_json
+        json :result => result
       else
         rs = mysql.query "SELECT * FROM `ibetyou`.`bet` WHERE `id`=#{params[:id]}"
         if rs.num_rows === 0
@@ -519,12 +522,12 @@ post '/bet/reject/:id' do
             mysql.close
             status 403
             result = {'error' => 'You are not the challengee'}
-            body result.to_json
+            json :result => result
           elsif bet['status'] != 'new'
             mysql.close
             status 400
             result = {'error' => 'Bet already underway or finished'}
-            body result.to_json
+            json :result => result
           else
             rs = mysql.query "SELECT * FROM `ibetyou`.`user` WHERE `id`=#{bet['challenger']}"
             challenger = rs.fetch_hash
