@@ -378,8 +378,9 @@ post '/bet/won/:id' do
                   status 201
                   body ''
               else
+                mysql.query "UPDATE `ibetyou`.`bet` SET `status_challengee`='won' WHERE `id`=#{bet['id']}"
                 puts "what?"
-                status 500
+                status 201
                 body ''
               end
             else
@@ -475,8 +476,8 @@ post '/bet/lost/:id' do
                   status 201
                   body ''
               else
-                puts "what?"
-                status 500
+                mysql.query "UPDATE `ibetyou`.`bet` SET `status_challengee`='lost' WHERE `id`=#{bet['id']}"
+                status 201
                 body ''
               end
             else
