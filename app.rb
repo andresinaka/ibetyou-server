@@ -328,7 +328,7 @@ post '/bet/won/:id' do
             result = {"error" => 'bet in wrong state'}
             body result.to_json
           else
-            if bet['challenger'] == user['id'] && bet['status_challengee'] != 'won'
+            if bet['challenger'] == user['id']
               mysql.query "UPDATE `ibetyou`.`bet` SET `status`='won' WHERE `id`=#{bet['id']}"
               if bet['status_challengee'] == 'lost'
                 # todo bien
@@ -337,7 +337,7 @@ post '/bet/won/:id' do
                   " WHERE `id`=#{user['id']}"
                   status 201
                   body ''
-              elsif bet['challenger'] == user['id'] && bet['status_challengee'] == 'won'
+              elsif bet['status_challengee'] == 'won'
                 mysql.query "UPDATE `ibetyou`.`bet` SET `status`='draw' WHERE `id`=#{bet['id']}"
                 mysql.query "UPDATE `ibetyou`.`bet` SET `status_challengee`='draw' WHERE `id`=#{bet['id']}"
                 # draw
@@ -364,6 +364,8 @@ post '/bet/won/:id' do
                   status 201
                   body ''
               elsif bet['status'] == 'won'
+                mysql.query "UPDATE `ibetyou`.`bet` SET `status`='draw' WHERE `id`=#{bet['id']}"
+                mysql.query "UPDATE `ibetyou`.`bet` SET `status_challengee`='draw' WHERE `id`=#{bet['id']}"
                 mysql.query \
                   "UPDATE `ibetyou`.`user` SET `points`=`points`+#{bet['points']} " \
                   " WHERE `id`=#{bet['challenger']}"
@@ -425,7 +427,7 @@ post '/bet/lost/:id' do
             result = {"error" => 'bet in wrong state'}
             body result.to_json
           else
-            if bet['challenger'] == user['id'] && bet['status_challengee'] != 'lost'
+            if bet['challenger'] == user['id']
               mysql.query "UPDATE `ibetyou`.`bet` SET `status`='lost' WHERE `id`=#{bet['id']}"
               if bet['status_challengee'] == 'won'
                 # todo bien
@@ -434,7 +436,7 @@ post '/bet/lost/:id' do
                   " WHERE `id`=#{user['id']}"
                   status 201
                   body ''
-              elsif bet['challenger'] == user['id'] && bet['status_challengee'] == 'lost'
+              elsif bet['status_challengee'] == 'lost'
                 # draw
                 mysql.query "UPDATE `ibetyou`.`bet` SET `status`='draw' WHERE `id`=#{bet['id']}"
                 mysql.query "UPDATE `ibetyou`.`bet` SET `status_challengee`='draw' WHERE `id`=#{bet['id']}"
