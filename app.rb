@@ -108,8 +108,10 @@ get '/dashboard' do
       }
       puts "total: #{result}"
       status 200
-      json :result => result
-      #body result.to_json
+      #json :result => result
+          headers 'Content-Type' => 'application/json'
+
+      body result.to_json
       mysql.close
     end
   end
