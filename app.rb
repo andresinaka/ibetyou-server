@@ -280,7 +280,7 @@ post '/bet/accept/:id' do
           else
             mysql.query "UPDATE `ibetyou`.`bet` SET `status`='accepted' WHERE `id`=#{params[:id]}"
             mysql.query \
-              "UPDATE `ibetyou`.`user` SET `points`=`points`-#{params[:points]} " \
+              "UPDATE `ibetyou`.`user` SET `points`=`points`-#{bet[:points]} " \
               " WHERE `id`=#{user['id']}"
             mysql.close
             status 204
@@ -292,41 +292,56 @@ post '/bet/accept/:id' do
   end
 end
 
-#post '/bet/reject/:id' do
-#  mysql = Mysql.new 'localhost', 'root', 'pass'
-#  if params[:token].nil?
-#    status 403
-#    body ''
-#  else
-#    rs = mysql.query \
-#      "SELECT * FROM `ibetyou`.`user` WHERE `token`='#{params[:token]}'"
-#    if rs.num_rows === 0
-#      mysql.close
-#      status 403
-#      body ''
-#    else
-#      user = rs.fetch_hash
-#      if id.nil?
-#        mysql.close
-#        status 400
-#        result = {'error' => 'missing bet id'}
-#        body result.to_json
-#      else
-#        rs = mysql.query "SELECT * FROM `ibetyou`.`bet` WHERE `id`=#{id}"
-#        if rs.num_rows === 0
-#          mysql.close
-#          status 404
-#          body ''
-#        else
-#          bet = rs.fetch_hash
-#          if user['id'] != bet['challengee']
-#            mysql.close
-#            status 403
-#            result = {'error' => 'You are not the challengee'}
-#            body result.to_json
-#          end
-#        end
-#      end
-#    end
-#  end
-#end
+post '/bet/reject/:id' do
+  mysql = Mysql.new 'localhost', 'root', 'pass'
+  if params[:token].nil?
+    status 403
+    body ''
+  else
+    rs = mysql.query \
+      "SELECT * FROM `ibetyou`.`user` WHERE `token`='#{params[:token]}'"
+    if rs.num_rows === 0
+      mysql.close
+      status 403
+      body ''
+    else
+      user = rs.fetch_hash
+      if params[:id].nil?
+        mysql.close
+        status 400
+        result = {'error' => 'missing bet id'}
+        body result.to_json
+      else
+        rs = mysql.query "SELECT * FROM `ibetyou`.`bet` WHERE `id`=#{params[:id]}"
+        if rs.num_rows === 0
+          mysql.close
+          status 404
+          body ''
+        else
+          bet = rs.fetch_hash
+          if user['id'] != bet['challengee']
+            mysql.close
+            status 403
+            result = {'error' => 'You are not the challengee'}
+            body result.to_json
+          elsif bet['status'] != 'new'
+            mysql.close
+            status 400
+            result = {'error' => 'Bet already underway or finished'}
+            body result.to_json
+          else
+            rs = mysql.query "SELECT * FROM `ibetyou`.`bet` WHERE `id`=#{bet[:challenger]}"
+            challenger = rs.fetch_hash
+            mysql.query "UPDATE `ibetyou`.`bet` SET `status`='rejected' WHERE `id`=#{params[:id]}"
+            mysql.query \
+              "UPDATE `ibetyou`.`user` SET `points`=`points`+#{bet[:points]} " \
+              " WHERE `id`=#{challenger['id']}"
+            mysql.close
+            status 204
+            body ''
+          end
+        end
+      end
+    end
+  end
+end
