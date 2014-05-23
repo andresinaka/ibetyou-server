@@ -338,6 +338,8 @@ post '/bet/won/:id' do
                   status 201
                   body ''
               elsif bet['status_challengee'] == 'won'
+                mysql.query "UPDATE `ibetyou`.`bet` SET `status`='draw' WHERE `id`=#{bet['id']}"
+                mysql.query "UPDATE `ibetyou`.`bet` SET `status_challengee`='draw' WHERE `id`=#{bet['id']}"
                 # draw
                 mysql.query \
                   "UPDATE `ibetyou`.`user` SET `points`=`points`+#{bet['points']} " \
@@ -434,6 +436,8 @@ post '/bet/lost/:id' do
                   body ''
               elsif bet['status_challengee'] == 'lost'
                 # draw
+                mysql.query "UPDATE `ibetyou`.`bet` SET `status`='draw' WHERE `id`=#{bet['id']}"
+                mysql.query "UPDATE `ibetyou`.`bet` SET `status_challengee`='draw' WHERE `id`=#{bet['id']}"
                 mysql.query \
                   "UPDATE `ibetyou`.`user` SET `points`=`points`+#{bet['points']} " \
                   " WHERE `id`=#{bet['challenger']}"
