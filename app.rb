@@ -57,7 +57,7 @@ get '/dashboard' do
       users_lost = Hash.new(0)
       rs2 = mysql.query \
         "SELECT `email`,count(1) as c FROM `user` INNER JOIN " \
-        " `bet` ON `user`.`id` = `bet`.`challenger` WHERE `bet`.`status`='won' " \
+        " `bet` ON `user`.`id` = `bet`.`challenger` WHERE `bet`.`status`='won' AND `bet`.`status_challengee`='lost'" \
         " GROUP BY `challenger`  ORDER BY `c` DESC"
 
       # Won by challenger
@@ -68,7 +68,7 @@ get '/dashboard' do
       # Lost by challenger
       rs3 = mysql.query \
         "SELECT `email`,count(1) as c FROM `user` INNER JOIN " \
-        " `bet` ON `user`.`id` = `bet`.`challenger` WHERE `bet`.`status`='lost' " \
+        " `bet` ON `user`.`id` = `bet`.`challenger` WHERE `bet`.`status`='lost' AND `bet`.`status_challengee`='won' " \
         " GROUP BY `challenger`  ORDER BY `c` DESC"
       rs3.each_hash do |r|
         users_lost[r['email']] = users_lost[r['email']] + r['c'].to_i
@@ -77,7 +77,7 @@ get '/dashboard' do
       # Won by challengee
       rs4 = mysql.query \
         "SELECT `email`,count(1) as c FROM `user` INNER JOIN " \
-        " `bet` ON `user`.`id` = `bet`.`challengee` WHERE `bet`.`status`='lost' " \
+        " `bet` ON `user`.`id` = `bet`.`challengee` WHERE `bet`.`status`='lost' AND `bet`.`status_challengee`='won' " \
         " GROUP BY `challengee` ORDER BY `c` DESC"
       rs4.each_hash do |r|
         users_won[r['email']] = users_won[r['email']] + r['c'].to_i
@@ -86,7 +86,7 @@ get '/dashboard' do
       # Lost by challengee
       rs5 = mysql.query \
         "SELECT `email`,count(1) as c FROM `user` INNER JOIN " \
-        " `bet` ON `user`.`id` = `bet`.`challengee` WHERE `bet`.`status`='won' " \
+        " `bet` ON `user`.`id` = `bet`.`challengee` WHERE `bet`.`status`='won' AND `bet`.`status_challengee`='lost' " \
         " GROUP BY `challengee` ORDER BY `c` DESC"
       rs5.each_hash do |r|
         users_lost[r['email']] = users_lost[r['email']] + r['c'].to_i
