@@ -151,7 +151,8 @@ get '/bet/mine' do
           'challengee' => challengee['email'],
           'description' => bet['description'],
           'points' => bet['points'],
-          'status' => bet['status']
+          'status' => bet['status'],
+          'status_challengee' => bet['status_challengee']
         }
       end
       mysql.close
