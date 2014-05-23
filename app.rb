@@ -56,6 +56,11 @@ get '/dashboard' do
       user = rs.fetch_hash
       users_won = Hash.new(0)
       users_lost = Hash.new(0)
+      rs = mysql.query "select sum(points) as p from bet where (status='accepted' or status='new') " \
+      " and (challenger=#{user['id']} or challengee=#{user['id']})"
+      points_in_table_rs = rs.fetch_hash
+      points_in_table = points_in_table_rs['p'].to_i
+      if
       rs2 = mysql.query \
         "SELECT `email`,count(1) as c FROM `user` INNER JOIN " \
         " `bet` ON `user`.`id` = `bet`.`challenger` WHERE `bet`.`status`='won' AND `bet`.`status_challengee`='lost'" \
@@ -103,6 +108,7 @@ get '/dashboard' do
       result = {
         'result' => {
           'points' => user['points'],
+          'points_in_table' => points_in_table,
           'users' => users
         }
       }
