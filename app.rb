@@ -60,7 +60,6 @@ get '/dashboard' do
       " and (challenger=#{user['id']} or challengee=#{user['id']})"
       points_in_table_rs = rs.fetch_hash
       points_in_table = points_in_table_rs['p'].to_i
-      if
       rs2 = mysql.query \
         "SELECT `email`,count(1) as c FROM `user` INNER JOIN " \
         " `bet` ON `user`.`id` = `bet`.`challenger` WHERE `bet`.`status`='won' AND `bet`.`status_challengee`='lost'" \
@@ -108,7 +107,7 @@ get '/dashboard' do
       result = {
         'result' => {
           'points' => user['points'],
-          'points_in_table' => points_in_table,
+          'points_on_table' => points_in_table,
           'users' => users
         }
       }
@@ -143,8 +142,8 @@ get '/bet/mine' do
       rs.each_hash do |bet|
         rs2 = mysql.query "SELECT `email` FROM `ibetyou`.`user` WHERE `id`=#{bet['challengee']}"
         rs3 = mysql.query "SELECT `email` FROM `ibetyou`.`user` WHERE `id`=#{bet['challenger']}"
-        challenger = rs2.fetch_hash
-        challengee = rs3.fetch_hash
+        challenger = rs3.fetch_hash
+        challengee = rs2.fetch_hash
         bets << {
           'id' => bet['id'],
           'challenger' => challenger['email'],
@@ -534,6 +533,7 @@ post '/bet/reject/:id' do
           if user['id'] != bet['challengee']
             mysql.close
             status 403
+            puts "11"
             result = {'error' => 'You are not the challengee'}
             json :result => result
           elsif bet['status'] != 'new'
