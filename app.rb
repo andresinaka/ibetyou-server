@@ -446,7 +446,7 @@ post '/bet/lost/:id' do
                 # todo bien
                 mysql.query \
                   "UPDATE `ibetyou`.`user` SET `points`=`points`+#{bet['points'].to_i * 2} " \
-                  " WHERE `id`=#{user['id']}"
+                  " WHERE `id`=#{bet['challengee']}"
                   status 201
                   body ''
               elsif bet['status_challengee'] == 'lost'
