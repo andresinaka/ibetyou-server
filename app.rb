@@ -280,7 +280,7 @@ post '/bet/accept/:id' do
           else
             mysql.query "UPDATE `ibetyou`.`bet` SET `status`='accepted' WHERE `id`=#{params[:id]}"
             mysql.query \
-              "UPDATE `ibetyou`.`user` SET `points`=`points`-#{bet[:points]} " \
+              "UPDATE `ibetyou`.`user` SET `points`=`points`-#{bet['points']} " \
               " WHERE `id`=#{user['id']}"
             mysql.close
             status 204
@@ -330,11 +330,11 @@ post '/bet/reject/:id' do
             result = {'error' => 'Bet already underway or finished'}
             body result.to_json
           else
-            rs = mysql.query "SELECT * FROM `ibetyou`.`bet` WHERE `id`=#{bet[:challenger]}"
+            rs = mysql.query "SELECT * FROM `ibetyou`.`user` WHERE `id`=#{bet['challenger']}"
             challenger = rs.fetch_hash
             mysql.query "UPDATE `ibetyou`.`bet` SET `status`='rejected' WHERE `id`=#{params[:id]}"
             mysql.query \
-              "UPDATE `ibetyou`.`user` SET `points`=`points`+#{bet[:points]} " \
+              "UPDATE `ibetyou`.`user` SET `points`=`points`+#{bet['points']} " \
               " WHERE `id`=#{challenger['id']}"
             mysql.close
             status 204
