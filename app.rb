@@ -106,6 +106,7 @@ get '/dashboard' do
           'users' => users
         }
       }
+      puts "total: #{result}"
       status 200
       json :result => result
       #body result.to_json
@@ -422,7 +423,7 @@ post '/bet/lost/:id' do
           body ''
         else
           bet = rs.fetch_hash
-          if bet['status'] != 'accepted'
+          if bet['challenger'] == user['id'] && bet['status'] != 'accepted'
             status 404
             result = {"error" => 'bet in wrong state'}
             json :result => result
@@ -458,8 +459,8 @@ post '/bet/lost/:id' do
                 body ''
               end
             elsif bet['challengee'] == user['id']
-              mysql.query "UPDATE `ibetyou`.`bet` SET `status_challengee`='lost' WHERE `id`=#{bet['id']}"
               if bet['status'] == 'won'
+                mysql.query "UPDATE `ibetyou`.`bet` SET `status_challengee`='lost' WHERE `id`=#{bet['id']}"
                 # todo bien
                 mysql.query \
                   "UPDATE `ibetyou`.`user` SET `points`=`points`+#{bet['points'].to_i * 2} " \
@@ -467,6 +468,8 @@ post '/bet/lost/:id' do
                   status 201
                   body ''
               elsif bet['status'] == 'lost'
+                mysql.query "UPDATE `ibetyou`.`bet` SET `status`='draw' WHERE `id`=#{bet['id']}"
+                mysql.query "UPDATE `ibetyou`.`bet` SET `status_challengee`='draw' WHERE `id`=#{bet['id']}"
                 mysql.query \
                   "UPDATE `ibetyou`.`user` SET `points`=`points`+#{bet['points']} " \
                   " WHERE `id`=#{bet['challenger']}"
