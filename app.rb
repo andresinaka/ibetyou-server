@@ -328,7 +328,7 @@ post '/bet/won/:id' do
             result = {"error" => 'bet in wrong state'}
             body result.to_json
           else
-            if bet['challenger'] == user['id']
+            if bet['challenger'] == user['id'] && bet['status_challengee'] != 'won'
               mysql.query "UPDATE `ibetyou`.`bet` SET `status`='won' WHERE `id`=#{bet['id']}"
               if bet['status_challengee'] == 'lost'
                 # todo bien
@@ -425,7 +425,7 @@ post '/bet/lost/:id' do
             result = {"error" => 'bet in wrong state'}
             body result.to_json
           else
-            if bet['challenger'] == user['id']
+            if bet['challenger'] == user['id'] && bet['status_challengee'] != 'lost'
               mysql.query "UPDATE `ibetyou`.`bet` SET `status`='lost' WHERE `id`=#{bet['id']}"
               if bet['status_challengee'] == 'won'
                 # todo bien
