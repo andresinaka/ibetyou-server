@@ -355,8 +355,8 @@ post '/bet/won/:id' do
                 body ''
               end
             elsif bet['challengee'] == user['id']
-              mysql.query "UPDATE `ibetyou`.`bet` SET `status_challengee`='won' WHERE `id`=#{bet['id']}"
               if bet['status'] == 'lost'
+                mysql.query "UPDATE `ibetyou`.`bet` SET `status_challengee`='won' WHERE `id`=#{bet['id']}"
                 # todo bien
                 mysql.query \
                   "UPDATE `ibetyou`.`user` SET `points`=`points`+#{bet['points'].to_i * 2} " \
